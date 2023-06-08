@@ -104,6 +104,7 @@ def download(
     max_shard_retry: int = 1,
     user_agent_token: Optional[str] = None,
     disallowed_header_directives: Optional[List[str]] = None,
+    start_shard_id: int = 0
 ):
     """Download is the main entry point of img2dataset, it uses multiple processes and download multiple files"""
     if disallowed_header_directives is None:
@@ -183,6 +184,7 @@ def download(
         number_sample_per_shard,
         done_shards,
         tmp_path,
+        start_shard_id
     )
 
     if output_format == "webdataset":

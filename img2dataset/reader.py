@@ -38,6 +38,7 @@ class Reader:
         number_sample_per_shard,
         done_shards,
         tmp_path,
+        start_shard_id
     ) -> None:
         self.input_format = input_format
         self.url_col = url_col
@@ -73,6 +74,11 @@ class Reader:
             self.column_list = self.column_list + ["url"]
         else:
             raise ValueError(f"Invalid input format {self.input_format}")
+
+        if start_shard_id < 0:
+            raise ValueError(f"Start shard id must be >= 0 but got {start_shard_id}")
+        else:
+            self.start_shard_id = start_shard_id
 
     def _save_to_arrow(self, input_file, start_shard_id):
         """Read the input file and save to arrow files in a temporary directory"""
@@ -176,11 +182,10 @@ class Reader:
         shard is a tuple (sample id, sample)
         sample is a tuple of the columns
         """
-        start_shard_id = 0
         for i, input_file in enumerate(self.input_files):
             print("Sharding file number " + str(i + 1) + " of " + str(len(self.input_files)) + " called " + input_file)
 
-            shards, number_shards = self._save_to_arrow(input_file, start_shard_id)
+            shards, number_shards = self._save_to_arrow(input_file, self.start_shard_id)
             print("File sharded in " + str(len(shards)) + " shards")
             print(
                 "Downloading starting now, check your bandwidth speed (with bwm-ng)"
@@ -192,4 +197,4 @@ class Reader:
                     shard_id,
                     arrow_file,
                 )
-            start_shard_id += number_shards
+            self.start_shard_id += number_shards
